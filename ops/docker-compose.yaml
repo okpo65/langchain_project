@@ -2,17 +2,15 @@ version: '3'
 
 services:
   db:
-    image: mysql:5.7
-    restart: always
+    image: postgres:latest  # PostgreSQL 이미지를 사용
     ports:
-      - 3306:3306
+      - 5432:5432  # PostgreSQL의 기본 포트는 5432
     volumes:
-      - .././db_data:/var/lib/mysql
+      - .././db_data:/var/lib/postgresql/data  # 데이터를 저장할 볼륨
     environment:
-      MYSQL_ROOT_PASSWORD: llm
-#      MYSQL_DATABASE: llm
-#      MYSQL_USER:
-#      MYSQL_PASSWORD: mypassword
+      POSTGRES_PASSWORD: password  # 루트 비밀번호 설정
+#      POSTGRES_USER: your_user  # PostgreSQL 사용자명
+#      POSTGRES_DB: your_database  # 초기에 생성할 데이터베이스 이름
 
   django:
     build:
