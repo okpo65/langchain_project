@@ -2,15 +2,13 @@ version: '3'
 
 services:
   db:
-    image: postgres:latest  # PostgreSQL 이미지를 사용
+    image: postgres:latest
     ports:
-      - 5432:5432  # PostgreSQL의 기본 포트는 5432
+      - 5432:5432
     volumes:
-      - .././db_data:/var/lib/postgresql/data  # 데이터를 저장할 볼륨
+      - .././db_data:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: password  # 루트 비밀번호 설정
-#      POSTGRES_USER: your_user  # PostgreSQL 사용자명
-#      POSTGRES_DB: your_database  # 초기에 생성할 데이터베이스 이름
 
   django:
     build:
@@ -18,8 +16,6 @@ services:
       dockerfile: ops/Dockerfile
     ports:
       - "80:80"
-#    volumes:
-#      - ./:./
     depends_on:
       - db
 
