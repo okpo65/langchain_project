@@ -8,7 +8,25 @@ services:
     volumes:
       - .././db_data:/var/lib/postgresql/data
     environment:
-      POSTGRES_PASSWORD: password  # 루트 비밀번호 설정
+      POSTGRES_PASSWORD: password  # Root password setting
+
+  redis_service:
+    image: redis:latest
+    ports:
+      - 6379:6379
+
+  celery:
+    build:
+      context: ../
+      dockerfile: ops/Dockerfile
+    command: celery -A config worker -l info -c 5 -Q default
+    volumes:
+      - ../:/app
+    depends_on:
+      - db
+      - redis_service
+#    environment:
+#      - CELERY_BROKER_URL=redis://redis:6379/0
 
   django:
     build:
@@ -18,6 +36,8 @@ services:
       - "80:80"
     depends_on:
       - db
+      - redis_service
+      - celery
 
 volumes:
   db_data:
