@@ -7,14 +7,31 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from transformers import AutoTokenizer, AutoModelForQuestionAnswering
+import torch
 
 class GetMRCResultAPIView(APIView):
     permission_classes = [AllowAny]
 
-    def post(self, request):
+    tokenizer = AutoTokenizer.from_pretrained("Kdogs/klue-finetuned-squad_kor_v1")
+    model = AutoModelForQuestionAnswering.from_pretrained("Kdogs/klue-finetuned-squad_kor_v1")
 
-        return Response({'result': ''}, status=status.HTTP_200_OK)
+    def post(self, request):
+        question = request.data['question']
+        context = request.data['context']
+
+        inputs = self.tokenizer(question, context, return_tensors="pt")
+
+        with torch.no_grad():
+            outputs = self.model(**inputs)
+
+        answer_start_index = outputs.start_logits.argmax()
+        answer_end_index = outputs.end_logits.argmax()
+
+        predict_answer_tokens = inputs.input_ids[0, answer_start_index: answer_end_index + 1]
+        result = self.tokenizer.decode(predict_answer_tokens, skip_special_tokens=True)
+
+        return Response({'result': result}, status=status.HTTP_200_OK)
 
 
 class GetQAResultAPIView(APIView):
