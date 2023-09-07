@@ -13,9 +13,9 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 
 load_dotenv(dotenv_path=BASE_DIR / '.env')
@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'config',
-    'llm'
+    'llm',
+    'celery'
 ]
 
 MIDDLEWARE = [
@@ -132,3 +133,10 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND')
+
+GOOGLE_CSE_ID = os.getenv("GOOGLE_CSE_ID")
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
