@@ -4,6 +4,7 @@ from langchain.chat_models import ChatOpenAI
 from langchain_experimental.sql import SQLDatabaseChain
 import os
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -24,6 +25,10 @@ class GetMRCResultAPIView(APIView):
         context = request.data['context']
 
         inputs = self.tokenizer(question, context, return_tensors="pt")
+
+        input_length = inputs.input_ids.shape[1]
+        if input_length > 512:
+            raise ValidationError("The total number of tokens in the question and context cannot exceed 512.")
 
         with torch.no_grad():
             outputs = self.model(**inputs)
