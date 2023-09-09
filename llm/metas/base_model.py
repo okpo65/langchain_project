@@ -89,7 +89,6 @@ class ChatMemoryModel(BaseLangchainModel):
     google_cse_id = os.getenv('GOOGLE_CSE_ID')
 
     def __init__(self):
-        llm = OpenAIModelContainer(temperature=0, model_name='gpt-3.5-turbo-0613').get_chat_model()
         search = GoogleSearchAPIWrapper(google_api_key=self.google_api_key, google_cse_id=self.google_cse_id)
         tools = [
             Tool(
