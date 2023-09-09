@@ -88,7 +88,7 @@ class ChatMemoryModel(BaseLangchainModel):
     google_api_key = os.getenv('GOOGLE_API_KEY')
     google_cse_id = os.getenv('GOOGLE_CSE_ID')
 
-    def __init__(self):
+    def __init__(self, session_id):
         search = GoogleSearchAPIWrapper(google_api_key=self.google_api_key, google_cse_id=self.google_cse_id)
         tools = [
             Tool(
@@ -112,7 +112,7 @@ class ChatMemoryModel(BaseLangchainModel):
             input_variables=["input", "chat_history", "agent_scratchpad"],
         )
         message_history = RedisChatMessageHistory(
-            url=self.redis_broker_url, ttl=600, session_id="my-session"
+            url=self.redis_broker_url, ttl=600, session_id=f"{session_id}"
         )
 
         memory = ConversationBufferMemory(
