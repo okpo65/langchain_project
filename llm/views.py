@@ -12,53 +12,71 @@ from transformers import AutoTokenizer, AutoModelForQuestionAnswering
 import torch
 
 from llm.metas.base_model import SQLChainModel, ChatMemoryModel
+from llm.models import Session, LogLLM, LogStateType, LLMTaskType
 
 
-class GetMRCResultAPIView(APIView):
+class RequestMRCAPIView(APIView):
     permission_classes = [AllowAny]
-
-    tokenizer = AutoTokenizer.from_pretrained("Kdogs/klue-finetuned-squad_kor_v1")
-    model = AutoModelForQuestionAnswering.from_pretrained("Kdogs/klue-finetuned-squad_kor_v1")
 
     def post(self, request):
         question = request.data['question']
         context = request.data['context']
+        session_id = request.data['session_id']
 
-        inputs = self.tokenizer(question, context, return_tensors="pt")
+        log = LogLLM.objects.create(question=question, session_id=session_id, context=context, task_type=LLMTaskType.MRC)
+        log.add_state(state=LogStateType.Pending)
+        from llm.tasks import task_llm_log_processing
+        task_llm_log_processing.apply_async(
+            (log.id,)
+        )
 
-        input_length = inputs.input_ids.shape[1]
-        if input_length > 512:
-            raise ValidationError("The total number of tokens in the question and context cannot exceed 512.")
-
-        with torch.no_grad():
-            outputs = self.model(**inputs)
-
-        answer_start_index = outputs.start_logits.argmax()
-        answer_end_index = outputs.end_logits.argmax()
-
-        predict_answer_tokens = inputs.input_ids[0, answer_start_index: answer_end_index + 1]
-        result = self.tokenizer.decode(predict_answer_tokens, skip_special_tokens=True)
-
-        return Response({'result': result}, status=status.HTTP_200_OK)
+        return Response({'log_id': log.id}, status=status.HTTP_200_OK)
 
 
-class GetQAResultAPIView(APIView):
+class RequestQAAPIView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
         question = request.data['question']
         task_type = request.data['task_type']
+        session_id = request.data['session_id']
 
-        if task_type == "sql":
-            result = SQLChainModel().get_result(question)
-        elif task_type == "search":
-            result = ChatMemoryModel().get_result(question)
-        return Response({'result': result}, status=status.HTTP_200_OK)
+        log = LogLLM.objects.create(question=question, session_id=session_id, task_type=task_type)
+        log.add_state(state=LogStateType.Pending)
+        from llm.tasks import task_llm_log_processing
+        task_llm_log_processing.apply_async(
+            (log.id,)
+        )
+
+        return Response({'log_id': log.id}, status=status.HTTP_200_OK)
+
+
+class GetResultLLMLog(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        log_id = request.query_params['log_id']
+        log = LogLLM.objects.get(id=log_id)
+        answer = log.answer
+        state = log.states.last().state
+
+        return Response({'answer': answer, 'state': state}, status=status.HTTP_200_OK)
 
 
 class PollForResultAPIView(APIView):
     permission_classes = [AllowAny]
 
-    def post(self, request):
+    def get(self, request):
+        log_id = request.query_params['log_id']
+        log = LogLLM.objects.get(id=log_id)
 
-        return Response({'result': ''}, status=status.HTTP_200_OK)
+        state = log.states.last().state
+        return Response({'state': state}, status=status.HTTP_200_OK)
+
+
+class CreateSessionAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        session = Session.objects.create()
+        return Response({'session_id': session.id}, status=status.HTTP_200_OK)
