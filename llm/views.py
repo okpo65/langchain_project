@@ -1,17 +1,8 @@
-from django.shortcuts import render
-from langchain import OpenAI, SQLDatabase
-from langchain.chat_models import ChatOpenAI
-from langchain_experimental.sql import SQLDatabaseChain
-import os
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from transformers import AutoTokenizer, AutoModelForQuestionAnswering
-import torch
-
-from llm.metas.base_model import SQLChainModel, ChatMemoryModel
 from llm.models import Session, LogLLM, LogStateType, LLMTaskType
 
 
@@ -23,7 +14,8 @@ class RequestMRCAPIView(APIView):
         context = request.data['context']
         session_id = request.data['session_id']
 
-        log = LogLLM.objects.create(question=question, session_id=session_id, context=context, task_type=LLMTaskType.MRC)
+        log = LogLLM.objects.create(question=question, session_id=session_id, context=context,
+                                    task_type=LLMTaskType.MRC)
         log.add_state(state=LogStateType.Pending)
         from llm.tasks import task_llm_log_processing
         task_llm_log_processing.apply_async(
