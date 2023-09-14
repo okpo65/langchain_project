@@ -138,3 +138,24 @@ docker-compose -f ops/docker-compose.yaml up --build
 1. **Celery**: 작업이 완료되면, 그 결과를 서버에 전달하여 task 상태를 업데이트합니다.
 2. **Client**: 작업 결과를 서버에 요청합니다.
 3. **Server**: 작업 결과를 클라이언트에게 전달합니다.
+
+## 결과
+
+**MRC task 요청**
+
+<p align="left">
+  <img src="https://github.com/okpo65/wrtn_project/assets/20599796/8347e0e9-b111-4398-bc43-f9c151eb68e8" height="500" width="800">
+</p>
+
+**task 상태 확인**
+<p align="left">
+  <img src="https://github.com/okpo65/wrtn_project/assets/20599796/2d1207bb-b838-4cbd-b32c-9ad5c1b7afc6" height="500" width="800">
+</p>
+
+**task 결과 확인**
+<p align="left">
+  <img src="https://github.com/okpo65/wrtn_project/assets/20599796/90318fda-7eea-4273-bace-38b8db28513b" height="500" width="800">
+</p>
+
+
+
