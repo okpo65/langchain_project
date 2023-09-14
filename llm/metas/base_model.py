@@ -49,7 +49,7 @@ class SQLChainModel(BaseLangchainModel):
         )
 
         # setup llm
-        llm = ChatOpenAI(temperature=0, model_name=self.model_name)
+        llm = ChatOpenAI(temperature=0, model_name="gpt-4")
 
         # Create db chain
         self.prompt_query = """
@@ -103,7 +103,8 @@ class ChatMemoryModel(BaseLangchainModel):
 
         {chat_history}
         Question: {input}
-        {agent_scratchpad}"""
+        {agent_scratchpad}
+        """
 
         prompt = ZeroShotAgent.create_prompt(
             tools,
@@ -119,7 +120,7 @@ class ChatMemoryModel(BaseLangchainModel):
             memory_key="chat_history", chat_memory=message_history
         )
 
-        llm_chain = LLMChain(llm=OpenAI(temperature=0), prompt=prompt)
+        llm_chain = LLMChain(llm=OpenAI(temperature=0, model_name='gpt-4'), prompt=prompt)
         agent = ZeroShotAgent(llm_chain=llm_chain, tools=tools, verbose=True)
         self.agent_chain = AgentExecutor.from_agent_and_tools(
             agent=agent, tools=tools, verbose=True, memory=memory
