@@ -1,5 +1,4 @@
 from abc import ABCMeta, abstractmethod
-from django.shortcuts import render
 from langchain import OpenAI, SQLDatabase
 from langchain.chat_models import ChatOpenAI
 from langchain_experimental.sql import SQLDatabaseChain
@@ -9,21 +8,6 @@ from langchain.memory import ConversationBufferMemory
 from langchain.memory.chat_message_histories import RedisChatMessageHistory
 from langchain import OpenAI, LLMChain
 from langchain.utilities import GoogleSearchAPIWrapper
-from transformers import AutoTokenizer, AutoModelForQuestionAnswering
-import torch
-
-
-class OpenAIModelContainer:
-    def __init__(self, model_name, temperature):
-        self.openai_api_key = os.getenv('OPENAI_API_KEY')
-        self.model_name = model_name
-        self.temperature = temperature
-
-    def get_chat_model(self):
-        return ChatOpenAI(temperature=self.temperature, openai_api_key=self.openai_api_key, model_name=self.model_name)
-
-    def get_model(self):
-        return ChatOpenAI(temperature=self.temperature, openai_api_key=self.openai_api_key, model_name=self.model_name)
 
 
 class BaseLangchainModel(metaclass=ABCMeta):
