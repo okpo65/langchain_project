@@ -10,9 +10,9 @@ class LogStateType(TextChoices):
 
 
 class LLMTaskType(TextChoices):
-    QA_SQL = 'QA_SQL'
-    QA_SEARCH = 'QA_SEARCH'
-    MRC = 'MRC'
+    QA_SQL = 'sql'
+    QA_SEARCH = 'search'
+    MRC = 'mrc'
 
 
 class BaseModel(models.Model):
