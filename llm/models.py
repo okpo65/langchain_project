@@ -44,3 +44,11 @@ class LogLLM(BaseModel):
 class LogLLMState(BaseModel):
     log = models.ForeignKey(LogLLM, related_name='states', on_delete=models.CASCADE)
     state = models.CharField(max_length=20)
+
+
+class Stock(BaseModel):
+    symbol = models.CharField(max_length=32)
+    date = models.DateTimeField(verbose_name="시세 날짜")
+    highest_price = models.FloatField(default=0)
+    lowest_price = models.FloatField(default=0)
+    close_price = models.FloatField(default=0)
