@@ -13,7 +13,6 @@ COPY ../requirements.txt /llm/
 RUN pip install -r requirements.txt
 
 COPY . /llm/
-
 EXPOSE 80
 
 # Django 애플리케이션 실행 명령

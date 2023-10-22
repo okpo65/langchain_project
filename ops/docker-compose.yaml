@@ -7,8 +7,17 @@ services:
       - 5432:5432
     volumes:
       - .././db_data:/var/lib/postgresql/data
+
     environment:
-      POSTGRES_PASSWORD: password
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${DB_USER} -d ${DB_NAME}'"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
 
   redis_service:
     image: redis:latest
@@ -30,12 +39,16 @@ services:
     build:
       context: ../
       dockerfile: ops/Dockerfile
+#    entrypoint: ["ops/entrypoint.sh"]
     ports:
       - "80:80"
     depends_on:
-      - db
-      - redis_service
-      - celery
+      db:
+        condition: service_healthy
+#      redis_service:
+#        condition: service_healthy
+#      celery:
+#        condition: service_healthy
 
 volumes:
   db_data:
