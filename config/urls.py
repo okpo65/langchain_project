@@ -21,7 +21,7 @@ from django.conf import settings
 urlpatterns = []
 
 internal_api_urlpatterns = [
-    path('wrtn/', include(('llm.urls', 'llm'))),
+    path('langchain/', include(('llm.urls', 'llm'))),
 ]
 
 urlpatterns += internal_api_urlpatterns
