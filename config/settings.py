@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'config',
     'llm',
-    'celery'
+    'celery',
+    'django_extensions'
 ]
 
 MIDDLEWARE = [

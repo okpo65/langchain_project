@@ -48,6 +48,7 @@ class LogLLMState(BaseModel):
 
 class Stock(BaseModel):
     symbol = models.CharField(max_length=32)
+    name = models.CharField(max_length=64, null=True, default=None)
     date = models.DateTimeField(verbose_name="시세 날짜")
     highest_price = models.FloatField(default=0)
     lowest_price = models.FloatField(default=0)

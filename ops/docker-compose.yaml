@@ -39,16 +39,12 @@ services:
     build:
       context: ../
       dockerfile: ops/Dockerfile
-#    entrypoint: ["ops/entrypoint.sh"]
+    entrypoint: ["ops/entrypoint.sh"]
     ports:
       - "80:80"
     depends_on:
       db:
         condition: service_healthy
-#      redis_service:
-#        condition: service_healthy
-#      celery:
-#        condition: service_healthy
 
 volumes:
   db_data:
