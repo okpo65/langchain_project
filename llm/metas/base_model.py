@@ -9,6 +9,8 @@ from langchain.memory.chat_message_histories import RedisChatMessageHistory
 from langchain import OpenAI, LLMChain
 from langchain.utilities import GoogleSearchAPIWrapper
 
+from config.settings import OPENAI_API_KEY
+
 
 class BaseLangchainModel(metaclass=ABCMeta):
 
@@ -31,31 +33,20 @@ class SQLChainModel(BaseLangchainModel):
         db = SQLDatabase.from_uri(
             f'postgresql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}',
         )
-
         # setup llm
-        llm = ChatOpenAI(temperature=0, model_name="gpt-4")
+        llm = ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo", openai_api_key=OPENAI_API_KEY)
 
         # Create db chain
         self.prompt_query = """
                         Given an input question, first create a syntactically correct postgresql query to run, then look at the results of the query and return the answer.
 
-                        Make sure to include the unit of measurement from the 'UNIT_NAME' column and 'DATE' column in your final answer with korean.
-                        Ignore 'UNIT_NAME' if it is None.
-                        Find the one-word keyword in the question.
-
-                        Follow these steps:
-
-                        1. Use the identified keyword to formulate a PostgreSQL query. Your query should find rows where the keyword appears in the 'STAT_NAME' column using the LIKE operator with % as wildcards. If specific dates are provided in the question, include them in your query using the = operator to obtain values for each individual date. Limit the row count to 100.
-                        2. In the SQL results, identify the oldest date as the "Comparison Date" and the latest date as the "Reference Date". Calculate the difference by subtracting the value at the Comparison Date from that at the Reference Date. If the result is positive, it means the value has increased from the Comparison Date to the Reference Date. If the result is negative, it indicates a decrease.
-                        3. Summarize the answer based on the SQL results with Korean. 
-
                         Here is the format to follow:
-
+                        
                         Question: Question here
                         SQLQuery: SQL Query to run
                         SQLResult: Result of the SQLQuery
                         Answer: Final answer here
-
+                        
                         {question}
                 """
         # Setup the database chain
@@ -104,7 +95,7 @@ class ChatMemoryModel(BaseLangchainModel):
             memory_key="chat_history", chat_memory=message_history
         )
 
-        llm_chain = LLMChain(llm=OpenAI(temperature=0, model_name='gpt-4'), prompt=prompt)
+        llm_chain = LLMChain(llm=OpenAI(temperature=0, model_name='gpt-3.5-turbo', openai_api_key=OPENAI_API_KEY), prompt=prompt)
         agent = ZeroShotAgent(llm_chain=llm_chain, tools=tools, verbose=True)
         self.agent_chain = AgentExecutor.from_agent_and_tools(
             agent=agent, tools=tools, verbose=True, memory=memory

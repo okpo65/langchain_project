@@ -3,11 +3,15 @@ from llm.metas.base_model import SQLChainModel, ChatMemoryModel
 from llm.models import LogLLM, LogStateType, LLMTaskType
 from llm.services.llm_services import HuggingfaceBERTInstance
 
+from celery.utils.log import get_task_logger
+
+logger = get_task_logger(__name__)
 
 @shared_task(queue='default')
 def task_llm_log_processing(log_id: int):
     log = LogLLM.objects.get(id=log_id)
-
+    print("sdfdsf log id", log_id)
+    logger.info(log_id)
     if log.task_type == LLMTaskType.MRC:
         question = log.question
         context = log.context
@@ -25,9 +29,14 @@ def task_llm_log_processing(log_id: int):
 
     elif log.task_type == LLMTaskType.QA_SQL:
         question = log.question
+        print("question!!", question)
+        logger.info(f"question {question}")
+        # result = SQLChainModel().get_result(question)
         try:
             result = SQLChainModel().get_result(question)
-        except:
+        except Exception as e:
+            print("eeee", e)
+            logger.info(f"eeee, {e}")
             log.add_state(LogStateType.Failed)
             return
         log.answer = result

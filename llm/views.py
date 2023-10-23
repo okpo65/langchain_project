@@ -3,6 +3,8 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from llm.metas.base_model import SQLChainModel
 from llm.models import Session, LogLLM, LogStateType, LLMTaskType
 
 
@@ -35,10 +37,17 @@ class RequestQAAPIView(APIView):
 
         log = LogLLM.objects.create(question=question, session_id=session_id, task_type=task_type)
         log.add_state(state=LogStateType.Pending)
-        from llm.tasks import task_llm_log_processing
-        task_llm_log_processing.apply_async(
-            (log.id,)
-        )
+
+        result = SQLChainModel().get_result(question)
+
+        log.answer = result
+        log.save()
+        log.add_state(LogStateType.Succeeded)
+
+        # from llm.tasks import task_llm_log_processing
+        # task_llm_log_processing.apply_async(
+        #     (log.id,)
+        # )
 
         return Response({'log_id': log.id}, status=status.HTTP_200_OK)
 
@@ -48,6 +57,7 @@ class GetResultLLMLog(APIView):
 
     def get(self, request):
         log_id = request.query_params['log_id']
+        print("log_id!!", log_id, flush=True)
         log = LogLLM.objects.get(id=log_id)
         answer = log.answer
         state = log.states.last().state
