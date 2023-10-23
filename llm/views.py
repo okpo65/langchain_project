@@ -38,16 +38,16 @@ class RequestQAAPIView(APIView):
         log = LogLLM.objects.create(question=question, session_id=session_id, task_type=task_type)
         log.add_state(state=LogStateType.Pending)
 
-        result = SQLChainModel().get_result(question)
+        # result = SQLChainModel().get_result(question)
+        #
+        # log.answer = result
+        # log.save()
+        # log.add_state(LogStateType.Succeeded)
 
-        log.answer = result
-        log.save()
-        log.add_state(LogStateType.Succeeded)
-
-        # from llm.tasks import task_llm_log_processing
-        # task_llm_log_processing.apply_async(
-        #     (log.id,)
-        # )
+        from llm.tasks import task_llm_log_processing
+        task_llm_log_processing.apply_async(
+            (log.id,)
+        )
 
         return Response({'log_id': log.id}, status=status.HTTP_200_OK)
 
