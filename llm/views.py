@@ -57,7 +57,6 @@ class GetResultLLMLog(APIView):
 
     def get(self, request):
         log_id = request.query_params['log_id']
-        print("log_id!!", log_id, flush=True)
         log = LogLLM.objects.get(id=log_id)
         answer = log.answer
         state = log.states.last().state
