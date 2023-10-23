@@ -40,6 +40,10 @@ services:
       context: ../
       dockerfile: ops/Dockerfile
     entrypoint: ["ops/entrypoint.sh"]
+    volumes:
+      - type: bind
+        source: ../.
+        target: /langchain
     ports:
       - "80:80"
     depends_on:
